@@ -11,5 +11,4 @@ public interface CardRepo extends JpaRepository<Card,Long> {
     @Override
     Optional<Card> findById(Long id);
 
-    List<Card> findAllByUsers(List<User> users);
 }

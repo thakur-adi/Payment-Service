@@ -27,8 +27,7 @@ public class User extends Base{
     @ManyToMany
     private List<Card> cards;
 
-    public List<Card> addNewCard(Card newCard){
+    public void addNewCard(Card newCard){
         cards.add(newCard);
-        return List.copyOf(cards);
     }
 }

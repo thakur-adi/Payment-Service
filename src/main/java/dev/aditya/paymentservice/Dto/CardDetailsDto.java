@@ -12,6 +12,6 @@ public class CardDetailsDto {
     private String expiryMonth;
     private String expiryYear;
     private String cardNickName;
-    private CardType cardType;
-    private long userId;
+    private String cardType;
+    private Long userId;
 }

@@ -9,7 +9,11 @@ public interface IPaymentService {
 
     String generatePaymentLink(long orderId, long amount, long userId, String username, String phoneNumber, String userEmail) ;
 
-    Card addNewCard(String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, CardType cardType);
+    void addNewCard(String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, String cardType,Long userId);
 
-    void createNewTransaction(Session session);
+    void updateCard(long cardId, String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, String cardType,long userId);
+
+    void deleteCard(long cardId,long userId);
+
+    void updateTansactionDetails(Session session);
 }

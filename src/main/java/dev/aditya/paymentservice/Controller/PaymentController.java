@@ -31,18 +31,25 @@ public class PaymentController {
 
         paymentService.addNewCard(cardDetailsDto.getCardHolderName(), cardDetailsDto.getCardNumber()
                                  , cardDetailsDto.getExpiryMonth(),cardDetailsDto.getExpiryYear()
-                                 , cardDetailsDto.getCardNickName(), cardDetailsDto.getCardType());
+                                 , cardDetailsDto.getCardNickName(), cardDetailsDto.getCardType()
+                                 , cardDetailsDto.getUserId());
 
         return new ResponseEntity<>("card has been added to your account", HttpStatus.CREATED);
     }
 
     @PutMapping("/card/{cardId}")
     public ResponseEntity<String> updateCardDetails(@PathVariable("cardId") long cardId,  @RequestBody CardDetailsDto cardDetailsDto){
-        return new ResponseEntity<>("card updated", HttpStatus.OK);
+
+        paymentService.updateCard(cardId,cardDetailsDto.getCardHolderName(), cardDetailsDto.getCardNumber()
+                                 , cardDetailsDto.getExpiryMonth(),cardDetailsDto.getExpiryYear()
+                                 , cardDetailsDto.getCardNickName(), cardDetailsDto.getCardType()
+                                 , cardDetailsDto.getUserId());
+        return new ResponseEntity<>("card details have been updated", HttpStatus.OK);
     }
 
     @DeleteMapping("/card/{cardId}/{userId}")
     public ResponseEntity<String> deleteCardDetails(@PathVariable("cardId") long cardId,@PathVariable("userId") long userId  ){
+        paymentService.deleteCard(cardId,userId);
         return new ResponseEntity<>("card deleted", HttpStatus.OK);
     }
 }
