@@ -51,10 +51,10 @@ public class WebhookStripe {
 
 
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String signHeader) {
         try {
             // Verify and unpack the event envelope
-            Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
+            Event event = Webhook.constructEvent(payload, signHeader, endpointSecret);
             Session session = (Session) event.getDataObjectDeserializer().getObject().get();
 
             if ("checkout.session.completed".equals(event.getType())) {
