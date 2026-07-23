@@ -136,7 +136,6 @@ public class PaymentService implements IPaymentService {
     card.setExpiryYear(expiryYear);
     card.setCardNickName(cardNickName);
     card.setCardType(convertCardTypeToEnum(cardType));
-    card.setCardNumberBeginning(cardNumber.substring(0,8));
     card.setCardNumberLast(cardNumber.substring(8));
     return card;
     }
