@@ -109,10 +109,10 @@ All endpoints are prefixed with the context path "/payment".
 
 | Method   | Endpoint                          | Description             |
 | -------- | --------------------------------- | ----------------------- |
-| `POST`   | `/payment/payment-link`           | Create a payment session|
-| `POST`   | `/payment/card`                   | Save a payment card     |
-| `PUT`    | `/payment/card/{cardId}`          | Update card information |
-| `DELETE` | `/payment/card/{cardId}/{userId}` | Delete a saved card     |
+| `POST`   | `/payment-link`                   | Create a payment session|
+| `POST`   | `/card`                           | Save a payment card     |
+| `PUT`    | `/card/{cardId}`                  | Update card information |
+| `DELETE` | `/card/{cardId}/{userId}`         | Delete a saved card     |
 
 
 
@@ -120,18 +120,18 @@ All endpoints are prefixed with the context path "/payment".
 
 | Method   | Endpoint                          | Description                          |
 | -------- | --------------------------------- | ------------------------------------ |
-| `POST`   | `/payment/stripe/success`         | Receive gateway successful callbacks |
-| `POST`   | `/payment/stripe/failure`         | Receive gateway cancelled callbacks  |
-| `POST`   | `/payment/stripe/webhook`         | Receive gateway webhook callbacks    |
+| `POST`   | `/stripe/success`                 | Receive gateway successful callbacks |
+| `POST`   | `/stripe/failure`                 | Receive gateway cancelled callbacks  |
+| `POST`   | `/stripe/webhook`                 | Receive gateway webhook callbacks    |
 
 
 ### Razorpay Callback APIs
 
 | Method   | Endpoint                          | Description                          |
 | -------- | --------------------------------- | ------------------------------------ |
-| `POST`   | `/payment/razorpay/success`       | Receive gateway successful callbacks |
-| `POST`   | `/payment/razorpay/failure`       | Receive gateway cancelled callbacks  |
-| `POST`   | `/payment/razorpay/webhook`       | Receive gateway webhook callbacks    |
+| `POST`   | `/razorpay/success`               | Receive gateway successful callbacks |
+| `POST`   | `/razorpay/failure`               | Receive gateway cancelled callbacks  |
+| `POST`   | `/razorpay/webhook`               | Receive gateway webhook callbacks    |
 
 
 
