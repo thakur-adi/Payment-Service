@@ -8,6 +8,7 @@ import dev.aditya.paymentservice.Repository.CardRepo;
 import dev.aditya.paymentservice.Repository.TransactionRepo;
 import dev.aditya.paymentservice.Repository.UserRepo;
 import dev.aditya.paymentservice.Strategy.IPaymentGateway;
+import dev.aditya.paymentservice.Strategy.PaymentGatewaySelector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,6 @@ import java.util.Optional;
 
 @Service
 public class PaymentService implements IPaymentService {
-    @Autowired
-    @Qualifier("StripePaymentGateway")
-    private IPaymentGateway paymentGateway;
 
     @Autowired
     private TransactionRepo transactionRepo;
@@ -29,10 +27,15 @@ public class PaymentService implements IPaymentService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    PaymentGatewaySelector paymentGatewaySelector;
+
+
 
     @Override
     public String generatePaymentLink(long orderId, long amount, long userId,
                                       String username, String phoneNumber, String email) {
+        IPaymentGateway paymentGateway = paymentGatewaySelector.selectPaymentGateway("Stripe");
         Optional<User> optionalUser = userRepo.findById(userId);
         User user;
         if(optionalUser.isEmpty()){
@@ -136,7 +139,6 @@ public class PaymentService implements IPaymentService {
     card.setExpiryYear(expiryYear);
     card.setCardNickName(cardNickName);
     card.setCardType(convertCardTypeToEnum(cardType));
-    card.setCardNumberBeginning(cardNumber.substring(0,8));
     card.setCardNumberLast(cardNumber.substring(8));
     return card;
     }

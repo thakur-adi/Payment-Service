@@ -17,7 +17,6 @@ public class Card extends Base{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String cardHolderName;
-    private String cardNumberBeginning;
     private String cardNumberLast;
     private String expiryMonth;
     private String expiryYear;

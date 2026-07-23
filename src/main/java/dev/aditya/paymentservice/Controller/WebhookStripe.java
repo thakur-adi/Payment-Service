@@ -32,7 +32,7 @@ public class WebhookStripe {
     // A-> Because a browser redirect is forced to use a GET request, it cannot inject a hidden JSON payload or a structured Java object.
     // The only place Stripe can pass data to your server is by printing it right into the text of the URL string itself.
     // just the session-id is passed because of url length limit
-    @GetMapping("/success")
+    @PostMapping("/success")
     public void capturePaymentSuccess(@RequestParam("session_id") String session_id) {
         try {
             Session session = Session.retrieve(session_id);
@@ -44,17 +44,17 @@ public class WebhookStripe {
 
     }
 
-    @GetMapping("/failure")
+    @PostMapping("/failure")
     public ResponseEntity<String> capturePaymentFailure() {
         return new ResponseEntity<>("Could not complete transaction! Please try again later!!", HttpStatus.BAD_REQUEST);
     }
 
 
     @PostMapping("/webhook")
-    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+    public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String signHeader) {
         try {
             // Verify and unpack the event envelope
-            Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
+            Event event = Webhook.constructEvent(payload, signHeader, endpointSecret);
             Session session = (Session) event.getDataObjectDeserializer().getObject().get();
 
             if ("checkout.session.completed".equals(event.getType())) {
