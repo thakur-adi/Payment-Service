@@ -8,13 +8,15 @@ The service provides a unified payment abstraction over multiple payment gateway
 
 ## Highlights
 
-* **Multi-gateway architecture** — Supports both Stripe and Razorpay behind a common abstraction using Strategy, Adapter, and Factory patterns
-* **Webhook-driven transaction lifecycle** — Payment gateways asynchronously confirm transactions via webhooks, ensuring reliable payment status updates
+* **Multi-gateway architecture** — Supports both Stripe and Razorpay through a common abstraction using Strategy, Adapter, and Factory design patterns
+* **Dedicated gateway integrations** — Stripe and Razorpay callbacks are handled by separate controllers, isolating provider-specific logic and simplifying future gateway integrations
+* **Webhook-driven payment verification** — Payment status is confirmed through secure server-to-server webhooks rather than relying solely on client-side redirects
+* **Immutable transaction history** — Every significant payment gateway interaction is persisted as a new transaction record, preserving the complete payment lifecycle for auditing, debugging, and reconciliation
 * **Checkout Session integration** — Uses Stripe Checkout Sessions to support structured payment creation with customer details, metadata, success URLs, and cancel URLs
-* **Transaction persistence** — Every completed payment is stored with gateway metadata and associated user information for auditing and future processing
-* **Card management** — Supports storing user payment methods and card metadata through dedicated card endpoints
-* **LLD-compliant design** — Business logic is isolated from third-party SDKs through clean Low-Level Design principles
-* **Secrets externalized** — Payment gateway credentials and database configuration are loaded from environment variables
+* **Card management** — Provides dedicated APIs for securely managing user payment methods and associated card metadata
+* **LLD-compliant design** — Business logic is isolated from third-party SDKs through clean Low-Level Design principles with clear separation of responsibilities
+* **Secrets externalized** — Payment gateway credentials and database configuration are loaded from environment variables rather than being hardcoded
+
 
 ---
 
@@ -46,7 +48,7 @@ Gateway Response
 Webhook Controller
          │
          ├── Verify webhook signature
-         ├── Persist transaction
+         ├── Create Transaction Record
          └── Update payment status
 ```
 
@@ -62,12 +64,28 @@ Webhook Controller
 * **Success & Cancel URL handling** — Handles successful payments and user-initiated payment cancellations
 * **Payment status tracking** — Maintains payment lifecycle through gateway callbacks
 
-### Transaction Management
+## Transaction Management
 
-* Persist successful payment transactions
-* Maintain user-to-transaction relationships
-* Store gateway-specific payment references
-* Transaction history for auditing and future reconciliation
+- Persist every significant gateway interaction as a new transaction record
+- Immutable append-only transaction history
+- Associate transactions with users and payments
+- Store gateway-specific references and metadata
+- Preserve the complete payment lifecycle for every transaction
+- Simplify auditing, debugging, and reconciliation through historical records
+
+Example payment lifecycle:
+
+```text
+Payment Created
+        │
+Checkout Session Created
+        │
+Payment Authorized
+        │
+Payment Captured
+        │
+Payment Successful
+```
 
 ### Card Management
 
@@ -156,7 +174,7 @@ SUCCESS FLOW
   └──▶ Gateway redirects to Success URL
   └──▶ Gateway asynchronously sends webhook
   └──▶ Verify webhook signature
-  └──▶ Persist transaction
+  └──▶ Persist New Transaction Record
   └──▶ Update payment status
 ```
 
@@ -182,7 +200,13 @@ CANCEL FLOW
 
 **Why webhooks?**
 
--> Client-side redirects are not a reliable source of truth. Webhooks provide server-to-server confirmation directly from the payment gateway, allowing the service to securely verify and persist completed transactions regardless of client behavior.
+-> Client-side redirects are not a reliable source of truth. Webhooks provide server-to-server confirmation directly from the payment gateway, allowing the service to securely verify and persist completed transactions regardless of client behaviour.
+
+### Why an immutable transaction history?
+
+-> Payment gateways emit multiple events throughout a payment's lifecycle (checkout creation, authorization, capture, success, failure, refunds, etc.). Rather than updating a single transaction record, the service persists every significant gateway interaction as a new transaction entry.
+
+This append-only approach preserves the complete lifecycle of every payment, simplifies debugging and reconciliation, provides a detailed audit trail, and prepares the service for future event-driven integrations.
 
 ---
 
