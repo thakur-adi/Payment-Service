@@ -4,7 +4,6 @@ import com.razorpay.PaymentLink;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import dev.aditya.paymentservice.Exceptions.CustomPaymentGatewayException;
-import dev.aditya.paymentservice.Model.User;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -19,7 +18,7 @@ public class RazorpayPaymentGateway implements IPaymentGateway{
 
 
     @Override
-    public String generatePaymentLink(long orderId, long amount, User user) {
+    public String generatePaymentLink(long orderId, long amount, Long userId, String userName , String phoneNumber, String userEmail) {
 
         /* Razorpay Payment Link object(json)
         {
@@ -48,9 +47,9 @@ public class RazorpayPaymentGateway implements IPaymentGateway{
             paymentLinkRequest.put("description","Test payment for Payment service class");
 
             JSONObject customer = new JSONObject();
-            customer.put("name",user.getName());
-            customer.put("contact",user.getPhoneNumber());
-            customer.put("email",user.getEmail());
+            customer.put("name",userName);
+            customer.put("contact",phoneNumber);
+            customer.put("email",userEmail);
 
             paymentLinkRequest.put("customer",customer);
 

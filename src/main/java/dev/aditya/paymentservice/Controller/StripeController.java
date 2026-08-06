@@ -6,16 +6,19 @@ import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import dev.aditya.paymentservice.Exceptions.CustomPaymentGatewayException;
+import dev.aditya.paymentservice.Model.PaymentGateway;
 import dev.aditya.paymentservice.Service.IPaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/stripe")
-public class WebhookStripe {
+//This class contains all the code related to success path or Webhooks etc.
+public class StripeController {
 
     @Autowired
     private IPaymentService paymentService;
@@ -24,7 +27,8 @@ public class WebhookStripe {
     private String endpointSecret;
 
 
-    //Not a good idea to put it in Payment Controller the remaining payment gateways have their own way of implementing the success path so will have to write a separate code for each of them, better to use webhooks.
+    //Not a good idea to put it in Payment Controller the remaining payment gateways have their own way of implementing the success path,
+    //so will have to write a separate code for each of them, better to use webhooks.
 
     // This endpoint is not an API call made by code.
     // It is a browser address bar redirect, and web browsers can only open pages via GET requests.
@@ -36,7 +40,10 @@ public class WebhookStripe {
     public void capturePaymentSuccess(@RequestParam("session_id") String session_id) {
         try {
             Session session = Session.retrieve(session_id);
-            paymentService.updateTansactionDetails(session);
+            paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
+                                                ,session.getAmountTotal(),session.getPaymentStatus()
+                                                , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
+                                                ,PaymentGateway.STRIPE.toString());
         } catch (StripeException e) {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
@@ -44,22 +51,28 @@ public class WebhookStripe {
 
     }
 
+
+    //This handles the .setCancelUrl(), this isn't webhook
     @PostMapping("/failure")
     public ResponseEntity<String> capturePaymentFailure() {
         return new ResponseEntity<>("Could not complete transaction! Please try again later!!", HttpStatus.BAD_REQUEST);
     }
 
 
+    //This handles the actual webhook. Stripe expects response otherwise it'll be stuck in a webhook retry loop(will keep on sending a new event).
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Stripe-Signature") String signHeader) {
         try {
             // Verify and unpack the event envelope
             Event event = Webhook.constructEvent(payload, signHeader, endpointSecret);
             Session session = (Session) event.getDataObjectDeserializer().getObject().get();
-
             if ("checkout.session.completed".equals(event.getType())) {
                 // Open the envelope to get the Session object
-                paymentService.updateTansactionDetails(session);
+                paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
+                                                    ,session.getAmountTotal(),session.getPaymentStatus()
+                                                    , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
+                                                    ,PaymentGateway.STRIPE.toString());
+                return  new ResponseEntity<>("Webhook processed successfully!",HttpStatus.OK);
             }
             else if ("checkout.session.expired".equals((event.getType()))) {
                 throw new CustomPaymentGatewayException("Session Expired! Payment Failed, please try again later!!");
@@ -67,7 +80,6 @@ public class WebhookStripe {
         } catch (SignatureVerificationException e) {
             throw new CustomPaymentGatewayException("Verification Failed");
         }
-
-        return null;
+        return  new ResponseEntity<>("Webhook couldn't be processed, Retry!", HttpStatusCode.valueOf(400));
     }
 }

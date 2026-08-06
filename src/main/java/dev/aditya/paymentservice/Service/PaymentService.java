@@ -6,14 +6,10 @@ import dev.aditya.paymentservice.Exceptions.UserNotFoundException;
 import dev.aditya.paymentservice.Model.*;
 import dev.aditya.paymentservice.Repository.CardRepo;
 import dev.aditya.paymentservice.Repository.TransactionRepo;
-import dev.aditya.paymentservice.Repository.UserRepo;
 import dev.aditya.paymentservice.Strategy.IPaymentGateway;
 import dev.aditya.paymentservice.Strategy.PaymentGatewaySelector;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 public class PaymentService implements IPaymentService {
@@ -25,9 +21,6 @@ public class PaymentService implements IPaymentService {
     private CardRepo cardRepo;
 
     @Autowired
-    private UserRepo userRepo;
-
-    @Autowired
     PaymentGatewaySelector paymentGatewaySelector;
 
 
@@ -35,105 +28,61 @@ public class PaymentService implements IPaymentService {
     @Override
     public String generatePaymentLink(long orderId, long amount, long userId,
                                       String username, String phoneNumber, String email) {
-        IPaymentGateway paymentGateway = paymentGatewaySelector.selectPaymentGateway("Stripe");
-        Optional<User> optionalUser = userRepo.findById(userId);
-        User user;
-        if(optionalUser.isEmpty()){
-             user = new User();
-             user.setId(userId);
-             user.setName(username);
-             user.setEmail(email);
-             user.setPhoneNumber(phoneNumber);
-             userRepo.save(user);
-        }
-        else {user = optionalUser.get();}
+        IPaymentGateway paymentGateway = paymentGatewaySelector.selectPaymentGateway("Stripe"); //hardcoded for now
 
-
-        return paymentGateway.generatePaymentLink(orderId,amount,user);
+        return paymentGateway.generatePaymentLink(orderId,amount,userId,username,phoneNumber,email);
     }
 
     @Override
     public void addNewCard(String cardHolderName, String cardNumber, String expiryMonth
-                            , String expiryYear, String cardNickName, String cardType, Long userId) {
+                            , String expiryYear, String cardNickName, String cardType, long userId) {
 
-        Card card = createNewCard(cardHolderName, cardNumber, expiryMonth, expiryYear, cardNickName, cardType);
+        Card card = createNewCard(userId, cardHolderName, cardNumber, expiryMonth, expiryYear, cardNickName, cardType);
         cardRepo.save(card);
-        if(userRepo.findById(userId).isEmpty()){
-            throw new UserNotFoundException("Please provide correct userId");
-        }
-        User user = userRepo.findById(userId).get();
-        user.addNewCard(card);
-        userRepo.save(user);
     }
 
     @Override
-    public void updateCard(long cardId, String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, String cardType, long userId) {
-        Card newCard = createNewCard(cardHolderName, cardNumber, expiryMonth, expiryYear, cardNickName, cardType);
+    public void updateCard(long cardId, String cardHolderName, String cardNumber, String expiryMonth,
+                           String expiryYear, String cardNickName, String cardType, long userId) {
+        Card newCard = createNewCard(userId,cardHolderName, cardNumber, expiryMonth, expiryYear, cardNickName, cardType);
         newCard.setId(cardId);
-        if(userRepo.findById(userId).isEmpty()){
-            throw new UserNotFoundException("Please provide correct userId");
-        }
-        User user = userRepo.findById(userId).get();
-        user.getCards().removeIf(oldCard -> oldCard.getId()==cardId);
-        user.addNewCard(newCard);
-        userRepo.save(user);
-        cardRepo.deleteById(cardId);
         cardRepo.save(newCard);
     }
 
     @Override
     public void deleteCard(long cardId, long userId) {
-        if(userRepo.findById(userId).isEmpty()){
-            throw new UserNotFoundException("Please provide correct userId");
-        }
-        User user = userRepo.findById(userId).get();
-        user.getCards().removeIf(oldCard -> oldCard.getId()==cardId);
-        userRepo.save(user);
-        cardRepo.deleteById(cardId);
+        cardRepo.deleteByIdAndUserId(cardId,userId);
     }
 
-
+    //This for now only
     @Override
-    public void updateTansactionDetails(Session session) {
-        Optional<Transaction> optionalTransaction =  transactionRepo.findById(Long.valueOf(session.getPaymentIntent()));
-        if(optionalTransaction.isEmpty()){
-            //create new Transaction
+    public void saveTransactionDetails(String transactionId, String orderId, long amount, String paymentStatus, String paymentMethod, String userId, String paymentGateway) {
+            //Always create new Transaction, it gives us details about each transaction in details like when the last update happened, what was the update etc. Each step gets recorded.
             Transaction transaction = new Transaction();
-            transaction.setId(Long.parseLong(session.getPaymentIntent()));
-            transaction.setOrderId(Long.parseLong(session.getMetadata().get("order-id")));
-            transaction.setAmount(session.getAmountTotal());
-            transaction.setPaymentStatus(convertPaymentStatusToEnum(session.getPaymentStatus()));
-            transaction.setPaymentMethodType(convertPaymentMethodToEnum(session.getPaymentMethodTypes().get(0)));
-            if(userRepo.findUserByStripeCustomerId(session.getCustomer()).isEmpty()){
-               Optional<User> userOptional =  userRepo.findById(Long.valueOf(session.getClientReferenceId()));
-               User user = userOptional.get();
-               user.setStripeCustomerId(session.getCustomer());
-               userRepo.save(user);
-            }
-            transaction.setUser(userRepo.findById(Long.valueOf(session.getClientReferenceId())).get());
+            transaction.setTransactionId(transactionId);
+            transaction.setOrderId(Long.parseLong(orderId));
+            transaction.setAmount(amount);
+            transaction.setPaymentStatus(convertPaymentStatusToEnum(paymentStatus));
+            transaction.setPaymentMethodType(convertPaymentMethodToEnum(paymentMethod));
+            transaction.setUserId(Long.parseLong(userId));
+            transaction.setPaymentGateway(paymentGateway);
             transactionRepo.save(transaction);
-        }
-        else{
-            //update existing transaction
-            Transaction transaction = optionalTransaction.get();
-            transaction.setPaymentStatus(convertPaymentStatusToEnum(session.getPaymentStatus()));
-            transactionRepo.save(transaction);
-        }
     }
 
 
 
     //Helper methods
     private PaymentMethodType convertPaymentMethodToEnum(String paymentMethodType) {
-    return PaymentMethodType.CARD;
+    return PaymentMethodType.CARD; //hard coded for now
     }
 
     private PaymentStatus convertPaymentStatusToEnum(String paymentStatus) {
-        return  PaymentStatus.PROCESSING;
+        return  PaymentStatus.PROCESSING; //hard coded for now
     }
 
-    private Card createNewCard(String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, String cardType) {
+    private Card createNewCard(Long userId, String cardHolderName, String cardNumber, String expiryMonth, String expiryYear, String cardNickName, String cardType) {
     Card card = new Card();
+    card.setUserId(userId);
     card.setCardHolderName(cardHolderName);
     card.setExpiryMonth(expiryMonth);
     card.setExpiryYear(expiryYear);

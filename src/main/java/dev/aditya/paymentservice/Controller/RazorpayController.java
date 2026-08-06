@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/razorpay")
-public class WebhookRazorpay {
+public class RazorpayController {
 
     @Autowired
     private IPaymentService paymentService;
 
-    @Value("${Razorpay.endpoint_secret}")
-    private String endpointSecret;
+    @Value("${razorpay.key_secret}")
+    private String razorpaySecret;
 
     //These are just placeholders, would need to implement the APIs appropriately in accordance with RazorPay docs.
 
@@ -29,8 +29,9 @@ public class WebhookRazorpay {
         return new ResponseEntity<>("Could not complete transaction! Please try again later!!", HttpStatus.BAD_REQUEST);
     }
 
+    //This goes back to Razorpay.
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(@RequestBody String payload, @RequestHeader("Razorpay-Signature") String signHeader) {
-        return new ResponseEntity<>("Transaction Complete! Thank you for shopping with us", HttpStatus.OK);
+        return new ResponseEntity<>("Transaction Recorded!", HttpStatus.OK);
         }
 }

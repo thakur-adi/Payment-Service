@@ -9,7 +9,6 @@ import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.PriceCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import dev.aditya.paymentservice.Exceptions.CustomPaymentGatewayException;
-import dev.aditya.paymentservice.Model.User;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class StripePaymentGateway implements IPaymentGateway {
 
     @Override
     //we are using Stripe's checkout session object instead of payment links for various benefits over it.
-    public String generatePaymentLink(long orderId, long amount,User user) {
+    public String generatePaymentLink(long orderId, long amount, Long userId, String userName , String phoneNumber, String userEmail) {
 
         /*    Checkout Session Object :-
               "id": "cs_test_a11YYufWQzNY63zpQ6QSNRQhkUpVph4WRmzW0zWJO2znZKdVujZ0N0S22u",
@@ -148,11 +147,11 @@ public class StripePaymentGateway implements IPaymentGateway {
                                         .build())
                         //This tells what mode is it payment(once), recurring, etc.
                         .setMode(SessionCreateParams.Mode.PAYMENT)
-                        .setCustomer(createCustomer(user))// This helps avoid user to input their details everytime since we already know whose making the purchase better to send in the customer details beforehand.
+                        .setCustomer(createCustomer(userName ,phoneNumber,userEmail))// This helps avoid user to input their details everytime since we already know whose making the purchase better to send in the customer details beforehand.
                         // For the very first time when user initiates the payment, when the response comes back in....
                         // how would we map it to any user?
                         // For that reason we have to send in our userid so that later we can map and update the stripe customer id.
-                        .setClientReferenceId(String.valueOf(user.getId()))
+                        .setClientReferenceId(String.valueOf(userId))
                         //This sends a default invoice to user everytime they make a payment. Contains all details like customer details,order details(the line items), amount etc.
                         .setInvoiceCreation(SessionCreateParams.InvoiceCreation.builder()
                                             .setEnabled(true)
@@ -188,15 +187,12 @@ public class StripePaymentGateway implements IPaymentGateway {
         return price.getId();
     }
 
-    private String createCustomer(User user) {
-
-        if(user.getStripeCustomerId() == null) {
+    private String createCustomer(String userName , String phoneNumber, String userEmail) {
             CustomerCreateParams customerParams = CustomerCreateParams.builder()
-                    .setEmail(user.getEmail())
-                    .setName(user.getName())
-                    .setPhone(user.getPhoneNumber())
+                    .setEmail(userEmail)
+                    .setName(userName)
+                    .setPhone(phoneNumber)
                     .build();
-
             Customer customer = null;
             try {
                 customer = Customer.create(customerParams);
@@ -209,8 +205,4 @@ public class StripePaymentGateway implements IPaymentGateway {
                         " Please try again later or select any other Gateway!!");
             }
         }
-         return user.getStripeCustomerId();
-    }
-
-
 }
