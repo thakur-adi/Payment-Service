@@ -41,7 +41,7 @@ public class StripeController {
         try {
             Session session = Session.retrieve(session_id);
             paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
-                                                ,session.getAmountTotal(),session.getPaymentStatus()
+                                                ,session.getAmountTotal(),"SUCCESS" //session.getPaymentStatus()
                                                 , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
                                                 ,PaymentGateway.STRIPE.toString());
         } catch (StripeException e) {
@@ -54,8 +54,17 @@ public class StripeController {
 
     //This handles the .setCancelUrl(), this isn't webhook
     @PostMapping("/failure")
-    public ResponseEntity<String> capturePaymentFailure() {
-        return new ResponseEntity<>("Could not complete transaction! Please try again later!!", HttpStatus.BAD_REQUEST);
+    public void capturePaymentFailure(@RequestParam("session_id") String session_id) {
+        try {
+            Session session = Session.retrieve(session_id);
+            paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
+                    ,session.getAmountTotal(),"FAILURE" //session.getPaymentStatus()
+                    , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
+                    ,PaymentGateway.STRIPE.toString());
+        } catch (StripeException e) {
+            throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
+                    + "Please try again later or select any other Gateway!!");
+        }
     }
 
 
