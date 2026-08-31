@@ -40,7 +40,7 @@ public class StripeController {
     public ResponseEntity<String> capturePaymentSuccess(@RequestParam("session_id") String session_id) {
 
         //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
-        paymentService.saveTransactionDetailsTest(session_id,"SUCCESS","STRIPE");
+        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetailsTest(session_id,"SUCCESS","STRIPE");
 
         /* try {
             Ideal way -> what we'll actually receive from Stripe
@@ -54,7 +54,7 @@ public class StripeController {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
         }*/
-        return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", HttpStatus.OK);
+        return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", orderResponse.getStatusCode());
     }
 
 
@@ -63,7 +63,7 @@ public class StripeController {
     public ResponseEntity<String> capturePaymentFailure(@RequestParam("session_id") String session_id) {
 
         //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
-        paymentService.saveTransactionDetailsTest(session_id,"FAILURE","STRIPE");
+        ResponseEntity<String> orderResponse =  paymentService.saveTransactionDetailsTest(session_id,"FAILURE","STRIPE");
 
         /* try {
         //This is ideally how we'll get it from Stripe via session id, but fro testing purposes we'll use other method
@@ -76,7 +76,7 @@ public class StripeController {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
         }*/
-        return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", orderResponse.getStatusCode());
     }
 
 

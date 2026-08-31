@@ -4,6 +4,7 @@ import com.stripe.model.checkout.Session;
 import dev.aditya.paymentservice.Model.Card;
 import dev.aditya.paymentservice.Model.CardType;
 import dev.aditya.paymentservice.Model.Transaction;
+import org.springframework.http.ResponseEntity;
 
 public interface IPaymentService {
 
@@ -17,5 +18,5 @@ public interface IPaymentService {
 
     void saveTransactionDetails(String transactionId, String orderId,long amount,String paymentStatus, String paymentMethod, String userId, String paymentGateway);
 
-    void saveTransactionDetailsTest(String orderId,String paymentStatus,String paymentGateway);
+    ResponseEntity<String> saveTransactionDetailsTest(String orderId, String paymentStatus, String paymentGateway);
 }

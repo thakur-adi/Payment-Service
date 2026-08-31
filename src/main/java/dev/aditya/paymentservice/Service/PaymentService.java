@@ -9,10 +9,7 @@ import dev.aditya.paymentservice.Strategy.IPaymentGateway;
 import dev.aditya.paymentservice.Strategy.PaymentGatewaySelector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -92,7 +89,7 @@ public class PaymentService implements IPaymentService {
     }
 
     @Override
-    public void saveTransactionDetailsTest(String orderId, String paymentStatus,String paymentGateway) {
+    public ResponseEntity<String> saveTransactionDetailsTest(String orderId, String paymentStatus,String paymentGateway) {
         //Always create new Transaction, it gives us details about each transaction in details like when the last update happened, what was the update etc. Each step gets recorded.
         Transaction transaction = new Transaction();
         transaction.setTransactionId(orderId);
@@ -117,7 +114,7 @@ public class PaymentService implements IPaymentService {
 
         HttpEntity<PaymentResponseDto> requestEntity = new HttpEntity<>(paymentResponseDto,headers);
 
-        ResponseEntity<String> responseEntityFromOrderSer = restTemplate.postForEntity("http://localhost:8085/order/status",requestEntity, String.class);
+        return restTemplate.exchange("http://Order-Service/order/status", HttpMethod.PUT,requestEntity, String.class);
 
     }
 
