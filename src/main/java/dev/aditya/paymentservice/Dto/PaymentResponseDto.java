@@ -12,4 +12,5 @@ public class PaymentResponseDto {
     private Long paymentId;
     private String paymentMethod;
     private Long totalAmount;
+    private String paymentGateway;
 }

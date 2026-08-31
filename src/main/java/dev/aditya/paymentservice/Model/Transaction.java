@@ -13,7 +13,7 @@ public class Transaction extends Base{
     private long userId;
     private long orderId;
     private long amount;
-    private String transactionId;
+    private String transactionId; //received from Session object of Stripe/RazorPay -> This will remain same on updates via success,failure or webhooks.
     private PaymentStatus paymentStatus;
     // This forces JPA to save "CARD", "UPI", or "CASH" into the DB as String
     @Enumerated(EnumType.STRING)

@@ -21,11 +21,21 @@ public class RazorpayController {
     //These are just placeholders, would need to implement the APIs appropriately in accordance with RazorPay docs.
 
     @PostMapping("/success")
-    public ResponseEntity<String> capturePaymentSuccess(@RequestParam("session_id") String session_id){
+    public ResponseEntity<String> capturePaymentSuccess(@RequestParam("order_id") String orderId){
+        //This is created just for testing purposes.
+        //For testing purposes we'll consider sending an order_Id as a request param, which probably isn't given by RazorPay in reality.
+        //In Production would need to rewrite this code as this isn't provided by RazorPay, actually.
+        paymentService.saveTransactionDetailsTest(orderId,"SUCCESS","RAZORPAY");
+
         return new ResponseEntity<>("Transaction Complete! Thank you for shopping with us", HttpStatus.OK);}
 
     @PostMapping("/failure")
-    public ResponseEntity<String> capturePaymentFailure() {
+    public ResponseEntity<String> capturePaymentFailure(@RequestParam("order_id") String orderId) {
+        //This is created just for testing purposes.
+        //For testing purposes we'll consider sending an order_Id as a request param, which probably isn't given by RazorPay in reality.
+        //In Production would need to rewrite this code as this isn't provided by RazorPay, actually.
+        paymentService.saveTransactionDetailsTest(orderId,"FAILURE","RAZORPAY");
+
         return new ResponseEntity<>("Could not complete transaction! Please try again later!!", HttpStatus.BAD_REQUEST);
     }
 

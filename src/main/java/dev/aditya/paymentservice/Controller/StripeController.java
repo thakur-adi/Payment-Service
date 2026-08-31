@@ -37,8 +37,14 @@ public class StripeController {
     // The only place Stripe can pass data to your server is by printing it right into the text of the URL string itself.
     // just the session-id is passed because of url length limit
     @PostMapping("/success")
-    public void capturePaymentSuccess(@RequestParam("session_id") String session_id) {
-        try {
+    public ResponseEntity<String> capturePaymentSuccess(@RequestParam("session_id") String session_id) {
+
+        //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
+        paymentService.saveTransactionDetailsTest(session_id,"SUCCESS","STRIPE");
+
+        /* try {
+            Ideal way -> what we'll actually receive from Stripe
+
             Session session = Session.retrieve(session_id);
             paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
                                                 ,session.getAmountTotal(),"SUCCESS" //session.getPaymentStatus()
@@ -47,15 +53,20 @@ public class StripeController {
         } catch (StripeException e) {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
-        }
-
+        }*/
+        return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", HttpStatus.OK);
     }
 
 
     //This handles the .setCancelUrl(), this isn't webhook
     @PostMapping("/failure")
-    public void capturePaymentFailure(@RequestParam("session_id") String session_id) {
-        try {
+    public ResponseEntity<String> capturePaymentFailure(@RequestParam("session_id") String session_id) {
+
+        //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
+        paymentService.saveTransactionDetailsTest(session_id,"FAILURE","STRIPE");
+
+        /* try {
+        //This is ideally how we'll get it from Stripe via session id, but fro testing purposes we'll use other method
             Session session = Session.retrieve(session_id);
             paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
                     ,session.getAmountTotal(),"FAILURE" //session.getPaymentStatus()
@@ -64,7 +75,8 @@ public class StripeController {
         } catch (StripeException e) {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
-        }
+        }*/
+        return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", HttpStatus.BAD_REQUEST);
     }
 
 
