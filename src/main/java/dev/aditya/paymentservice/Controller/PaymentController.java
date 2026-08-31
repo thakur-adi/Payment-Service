@@ -19,11 +19,14 @@ public class PaymentController {
 
     @PostMapping("/pay")
     public ResponseEntity<String> generatePaymentLink(@RequestBody PaymentRequestDto paymentRequestDto){
+        /* Normal Code -> Just commented out for testing purposes
         String url = paymentService.generatePaymentLink(paymentRequestDto.getOrderId(),paymentRequestDto.getAmount()
                                             ,paymentRequestDto.getUserId(),paymentRequestDto.getUsername()
                                             ,paymentRequestDto.getPhoneNumber(),paymentRequestDto.getUserEmail());
 
-        return new ResponseEntity<>(url,HttpStatus.OK);
+        Just sending in Link as payment/transaction_id has not been generated just yet.
+         */
+        return new ResponseEntity<>("www.google.com",HttpStatus.CREATED);
     }
 
     @PostMapping("/card")

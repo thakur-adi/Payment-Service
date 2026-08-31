@@ -6,7 +6,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class PaymentResponseDto {
-
     private Long orderId;
     private String paymentStatus;
     private Long paymentId;

@@ -1,6 +1,7 @@
 package dev.aditya.paymentservice.Controller;
 
 
+import dev.aditya.paymentservice.Dto.PaymentStatusUpdateRequestDto;
 import dev.aditya.paymentservice.Service.IPaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,20 +22,31 @@ public class RazorpayController {
     //These are just placeholders, would need to implement the APIs appropriately in accordance with RazorPay docs.
 
     @PostMapping("/success")
-    public ResponseEntity<String> capturePaymentSuccess(@RequestParam("order_id") String orderId){
+    public ResponseEntity<String> capturePaymentSuccess(@RequestBody PaymentStatusUpdateRequestDto paymentStatusUpdateRequestDto){
         //This is created just for testing purposes.
         //For testing purposes we'll consider sending an order_Id as a request param, which probably isn't given by RazorPay in reality.
         //In Production would need to rewrite this code as this isn't provided by RazorPay, actually.
-        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetailsTest(orderId,"SUCCESS","RAZORPAY");
+        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetails(paymentStatusUpdateRequestDto.getTransactionId()
+                                                                                    ,paymentStatusUpdateRequestDto.getOrderId()
+                                                                                    ,paymentStatusUpdateRequestDto.getAmount()
+                                                                                    ,"SUCCESS","Card"
+                                                                                    ,paymentStatusUpdateRequestDto.getUserId()
+                                                                                    ,"RAZORPAY");
+
 
         return new ResponseEntity<>("Transaction Complete! Thank you for shopping with us", orderResponse.getStatusCode());}
 
     @PostMapping("/failure")
-    public ResponseEntity<String> capturePaymentFailure(@RequestParam("order_id") String orderId) {
+    public ResponseEntity<String> capturePaymentFailure(@RequestBody PaymentStatusUpdateRequestDto paymentStatusUpdateRequestDto) {
         //This is created just for testing purposes.
         //For testing purposes we'll consider sending an order_Id as a request param, which probably isn't given by RazorPay in reality.
         //In Production would need to rewrite this code as this isn't provided by RazorPay, actually.
-        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetailsTest(orderId,"FAILURE","RAZORPAY");
+        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetails(paymentStatusUpdateRequestDto.getTransactionId()
+                                                                                    ,paymentStatusUpdateRequestDto.getOrderId()
+                                                                                    ,paymentStatusUpdateRequestDto.getAmount()
+                                                                                    ,"FAILURE","Card"
+                                                                                    ,paymentStatusUpdateRequestDto.getUserId()
+                                                                                    ,"RAZORPAY");
 
         return new ResponseEntity<>("Could not complete transaction! Please try again later!!", orderResponse.getStatusCode());
     }

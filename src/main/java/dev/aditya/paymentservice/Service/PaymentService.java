@@ -59,8 +59,9 @@ public class PaymentService implements IPaymentService {
         cardRepo.deleteByIdAndUserId(cardId,userId);
     }
 
+    //Not using this anywhere for now
     @Override
-    public void saveTransactionDetails(String transactionId, String orderId, long amount, String paymentStatus, String paymentMethod, String userId, String paymentGateway) {
+    public ResponseEntity<String> saveTransactionDetails(String transactionId, String orderId, long amount, String paymentStatus, String paymentMethod, String userId, String paymentGateway) {
             //Always create new Transaction, it gives us details about each transaction in details like when the last update happened, what was the update etc. Each step gets recorded.
             Transaction transaction = new Transaction();
             transaction.setTransactionId(transactionId);
@@ -84,39 +85,10 @@ public class PaymentService implements IPaymentService {
 
             HttpEntity<PaymentResponseDto> requestEntity = new HttpEntity<>(paymentResponseDto,headers);
 
-            ResponseEntity<String> responseEntityFromOrderSer = restTemplate.postForEntity("http://localhost:8085/order/status",requestEntity, String.class);
-
-    }
-
-    @Override
-    public ResponseEntity<String> saveTransactionDetailsTest(String orderId, String paymentStatus,String paymentGateway) {
-        //Always create new Transaction, it gives us details about each transaction in details like when the last update happened, what was the update etc. Each step gets recorded.
-        Transaction transaction = new Transaction();
-        transaction.setTransactionId(orderId);
-        transaction.setOrderId(Long.parseLong(orderId));
-        transaction.setAmount(transactionRepo.findByOrderId(Long.valueOf(orderId)).getAmount());
-        transaction.setPaymentStatus(convertPaymentStatusToEnum(paymentStatus));
-        transaction.setPaymentMethodType(convertPaymentMethodToEnum("Card"));
-        transaction.setUserId(transactionRepo.findByOrderId(Long.valueOf(orderId)).getUserId());
-        transaction.setPaymentGateway(paymentGateway);
-        transactionRepo.save(transaction);
-
-        //Update the same in orderDetails
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        PaymentResponseDto paymentResponseDto = new PaymentResponseDto();
-        paymentResponseDto.setOrderId(Long.valueOf(orderId));
-        paymentResponseDto.setPaymentMethod("Card");
-        paymentResponseDto.setPaymentId(Long.valueOf(transaction.getTransactionId()));
-        paymentResponseDto.setPaymentStatus(paymentStatus);
-        paymentResponseDto.setPaymentGateway(paymentGateway);
-
-        HttpEntity<PaymentResponseDto> requestEntity = new HttpEntity<>(paymentResponseDto,headers);
-
         return restTemplate.exchange("http://Order-Service/order/status", HttpMethod.PUT,requestEntity, String.class);
 
     }
+
 
 
     //Helper methods

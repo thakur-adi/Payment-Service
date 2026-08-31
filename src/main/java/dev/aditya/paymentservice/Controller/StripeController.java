@@ -5,6 +5,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
+import dev.aditya.paymentservice.Dto.PaymentStatusUpdateRequestDto;
 import dev.aditya.paymentservice.Exceptions.CustomPaymentGatewayException;
 import dev.aditya.paymentservice.Model.PaymentGateway;
 import dev.aditya.paymentservice.Service.IPaymentService;
@@ -36,48 +37,46 @@ public class StripeController {
     // A-> Because a browser redirect is forced to use a GET request, it cannot inject a hidden JSON payload or a structured Java object.
     // The only place Stripe can pass data to your server is by printing it right into the text of the URL string itself.
     // just the session-id is passed because of url length limit
+    /*
     @PostMapping("/success")
     public ResponseEntity<String> capturePaymentSuccess(@RequestParam("session_id") String session_id) {
-
-        //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
-        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetailsTest(session_id,"SUCCESS","STRIPE");
-
-        /* try {
-            Ideal way -> what we'll actually receive from Stripe
-
+        try {
             Session session = Session.retrieve(session_id);
             paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
-                                                ,session.getAmountTotal(),"SUCCESS" //session.getPaymentStatus()
-                                                , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
-                                                ,PaymentGateway.STRIPE.toString());
+                                                  ,session.getAmountTotal(),session.getPaymentStatus()
+                                                  , session.getPaymentMethodTypes().get(0)
+                                                  ,session.getClientReferenceId()
+                                                  ,PaymentGateway.STRIPE.toString());
+
+            return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", HttpStatus.OK);
         } catch (StripeException e) {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
-        }*/
-        return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", orderResponse.getStatusCode());
+        }
     }
 
+     */
 
     //This handles the .setCancelUrl(), this isn't webhook
+    /*
     @PostMapping("/failure")
     public ResponseEntity<String> capturePaymentFailure(@RequestParam("session_id") String session_id) {
-
-        //This is created just for testing purposes. For testing purposes we'll consider session_id as order_Id and operate with that.
-        ResponseEntity<String> orderResponse =  paymentService.saveTransactionDetailsTest(session_id,"FAILURE","STRIPE");
-
-        /* try {
-        //This is ideally how we'll get it from Stripe via session id, but fro testing purposes we'll use other method
+        try {
             Session session = Session.retrieve(session_id);
             paymentService.saveTransactionDetails(session.getPaymentIntent(),session.getMetadata().get("order-id")
-                    ,session.getAmountTotal(),"FAILURE" //session.getPaymentStatus()
-                    , session.getPaymentMethodTypes().get(0),session.getClientReferenceId()
-                    ,PaymentGateway.STRIPE.toString());
-        } catch (StripeException e) {
+                                                 ,session.getAmountTotal(),session.getPaymentStatus()
+                                                 ,session.getPaymentMethodTypes().get(0)
+                                                 ,session.getClientReferenceId()
+                                                 ,PaymentGateway.STRIPE.toString());
+            return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", HttpStatus.OK);
+        }
+        catch (StripeException e)
+        {
             throw new CustomPaymentGatewayException("There seems to be some issue with the Gateway at the moment! "
                     + "Please try again later or select any other Gateway!!");
-        }*/
-        return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", orderResponse.getStatusCode());
+        }
     }
+     */
 
 
     //This handles the actual webhook. Stripe expects response otherwise it'll be stuck in a webhook retry loop(will keep on sending a new event).
@@ -103,4 +102,31 @@ public class StripeController {
         }
         return  new ResponseEntity<>("Webhook couldn't be processed, Retry!", HttpStatusCode.valueOf(400));
     }
+
+
+
+    //For Testing Purposes
+
+    @PostMapping("/test-success")
+    public ResponseEntity<String> capturePaymentSuccess(@RequestBody PaymentStatusUpdateRequestDto paymentStatusUpdateRequestDto) {
+        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetails(paymentStatusUpdateRequestDto.getTransactionId()
+                ,paymentStatusUpdateRequestDto.getOrderId()
+                ,paymentStatusUpdateRequestDto.getAmount()
+                ,"SUCCESS","Card"
+                ,paymentStatusUpdateRequestDto.getUserId()
+                ,"STRIPE");
+        return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", orderResponse.getStatusCode());
+    }
+
+    @PostMapping("/test-failure")
+    public ResponseEntity<String> capturePaymentFailure(@RequestBody PaymentStatusUpdateRequestDto paymentStatusUpdateRequestDto) {
+        ResponseEntity<String> orderResponse = paymentService.saveTransactionDetails(paymentStatusUpdateRequestDto.getTransactionId()
+                ,paymentStatusUpdateRequestDto.getOrderId()
+                ,paymentStatusUpdateRequestDto.getAmount()
+                ,"FAILURE","Card"
+                ,paymentStatusUpdateRequestDto.getUserId()
+                ,"STRIPE");
+        return new ResponseEntity<>("Could not complete transaction! Please try again later!! You can now close this page!", orderResponse.getStatusCode());
+    }
+
 }

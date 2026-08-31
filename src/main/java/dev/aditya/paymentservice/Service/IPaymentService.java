@@ -16,7 +16,6 @@ public interface IPaymentService {
 
     void deleteCard(long cardId,long userId);
 
-    void saveTransactionDetails(String transactionId, String orderId,long amount,String paymentStatus, String paymentMethod, String userId, String paymentGateway);
+    ResponseEntity<String> saveTransactionDetails(String transactionId, String orderId,long amount,String paymentStatus, String paymentMethod, String userId, String paymentGateway);
 
-    ResponseEntity<String> saveTransactionDetailsTest(String orderId, String paymentStatus, String paymentGateway);
 }

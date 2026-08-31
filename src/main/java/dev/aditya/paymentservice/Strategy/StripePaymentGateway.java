@@ -137,7 +137,7 @@ public class StripePaymentGateway implements IPaymentGateway {
                         // This gets triggered once customer hits submit button, regardless of whether the transaction is successful or not. For payment success check we have webhooks.
                         // Stripe automatically replaces checkout_session_id with the actual session_id of the session object generated on call back.
                         .setSuccessUrl("https://example.com/stripe/success{CHECKOUT_SESSION_ID}")
-                        .setCancelUrl("https://example.com/stripe/failure")// This gets triggered when customers shuts the browser window w/o completing the payment, or they click "Back" or "Cancel" button etc.
+                        .setCancelUrl("https://example.com/stripe/failure{CHECKOUT_SESSION_ID}")// This gets triggered when customers shuts the browser window w/o completing the payment, or they click "Back" or "Cancel" button etc.
                         .putMetadata("order-id",String.valueOf(orderId))
                         // REQUIRED - What they're buying
                         .addLineItem(
