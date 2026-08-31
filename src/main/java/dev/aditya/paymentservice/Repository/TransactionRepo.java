@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface TransactionRepo extends JpaRepository<Transaction,Long> {
 
+    Transaction findByOrderId(long orderId);
+
     Optional<Transaction> findTransactionById(long id);
 
     List<Transaction> findAllByCreatedAt(Date createdAt);
