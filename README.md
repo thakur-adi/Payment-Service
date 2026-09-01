@@ -222,9 +222,10 @@ Sensitive configuration is externalized via environment variables.
 | `stripe_endpoint_secret`| Stripe Webhook Secret |
 | `razorpay_key_id`       | Razorpay API ID       |
 | `razorpay_key_secret`   | Razorpay Secret Key   |
+| `eureka_server_url`     | Eureka Server URL     |
 
 ---
-
+<!--
 ## Getting Started
 
 ```bash
@@ -238,7 +239,7 @@ git clone https://github.com/your-username/payment-service.git
 ```
 
 ---
-
+-->
 ## Known Gaps & Roadmap
 
 * Kafka integration for publishing Payment Completed events
