@@ -10,6 +10,4 @@ public class PaymentStatusUpdateRequestDto {
     private String orderId;
     private Long amount;
     private String userId;
-
-
 }
