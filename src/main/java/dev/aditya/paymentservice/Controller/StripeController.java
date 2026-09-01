@@ -110,11 +110,11 @@ public class StripeController {
     @PostMapping("/test-success")
     public ResponseEntity<String> capturePaymentSuccess(@RequestBody PaymentStatusUpdateRequestDto paymentStatusUpdateRequestDto) {
         ResponseEntity<String> orderResponse = paymentService.saveTransactionDetails(paymentStatusUpdateRequestDto.getTransactionId()
-                ,paymentStatusUpdateRequestDto.getOrderId()
-                ,paymentStatusUpdateRequestDto.getAmount()
-                ,"SUCCESS","Card"
-                ,paymentStatusUpdateRequestDto.getUserId()
-                ,"STRIPE");
+                                                                                    ,paymentStatusUpdateRequestDto.getOrderId()
+                                                                                    ,paymentStatusUpdateRequestDto.getAmount()
+                                                                                    ,"SUCCESS","Card"
+                                                                                    ,paymentStatusUpdateRequestDto.getUserId()
+                                                                                    ,"STRIPE");
         return new ResponseEntity<>("Thank you for shopping with us!! You can now close this page!", orderResponse.getStatusCode());
     }
 

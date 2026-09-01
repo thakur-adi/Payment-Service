@@ -85,7 +85,7 @@ public class PaymentService implements IPaymentService {
 
             HttpEntity<PaymentResponseDto> requestEntity = new HttpEntity<>(paymentResponseDto,headers);
 
-        return restTemplate.exchange("http://Order-Service/order/status", HttpMethod.PUT,requestEntity, String.class);
+        return restTemplate.exchange("http://Order-Service/order/payment-status", HttpMethod.PUT,requestEntity, String.class);
 
     }
 

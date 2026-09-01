@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpServerErrorException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -20,5 +21,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<String> handleRuntimeException(RuntimeException e){
         return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
+    }
+    //For failed RestTemplate call i.e. this gets called when restTemplate call fails
+    @ExceptionHandler(HttpServerErrorException.class)
+    public ResponseEntity<String> handleHttpServerErrorException(HttpServerErrorException e){
+        return new ResponseEntity<>("Couldn't generate payment link! Please try again later!",e.getStatusCode());
     }
 }

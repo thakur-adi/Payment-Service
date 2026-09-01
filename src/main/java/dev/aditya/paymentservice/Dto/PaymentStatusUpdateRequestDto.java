@@ -7,7 +7,9 @@ import lombok.Setter;
 @Setter
 public class PaymentStatusUpdateRequestDto {
     private String transactionId;
-    private String userId;
-    private Long amount;
     private String orderId;
+    private Long amount;
+    private String userId;
+
+
 }
