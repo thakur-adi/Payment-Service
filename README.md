@@ -127,7 +127,7 @@ All endpoints are prefixed with the context path "/payment".
 
 | Method   | Endpoint                          | Description             |
 | -------- | --------------------------------- | ----------------------- |
-| `POST`   | `/payment-link`                   | Create a payment session|
+| `POST`   | `/pay`                            | Create a payment session|
 | `POST`   | `/card`                           | Save a payment card     |
 | `PUT`    | `/card/{cardId}`                  | Update card information |
 | `DELETE` | `/card/{cardId}/{userId}`         | Delete a saved card     |
