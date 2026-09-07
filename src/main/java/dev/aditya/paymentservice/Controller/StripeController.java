@@ -1,6 +1,7 @@
 package dev.aditya.paymentservice.Controller;
 
 import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
@@ -36,7 +37,8 @@ public class StripeController {
     // A-> Because a browser redirect is forced to use a GET request, it cannot inject a hidden JSON payload or a structured Java object.
     // The only place Stripe can pass data to your server is by printing it right into the text of the URL string itself.
     // just the session-id is passed because of url length limit
-    /*
+
+    //(actual stripe code)
     @PostMapping("/success")
     public ResponseEntity<String> capturePaymentSuccess(@RequestParam("session_id") String session_id) {
         try {
@@ -54,10 +56,9 @@ public class StripeController {
         }
     }
 
-     */
 
-    //This handles the .setCancelUrl(), this isn't webhook
-    /*
+
+    //This handles the .setCancelUrl() (actual stripe code), this isn't webhook
     @PostMapping("/failure")
     public ResponseEntity<String> capturePaymentFailure(@RequestParam("session_id") String session_id) {
         try {
@@ -75,7 +76,7 @@ public class StripeController {
                     + "Please try again later or select any other Gateway!!");
         }
     }
-     */
+
 
 
     //This handles the actual webhook. Stripe expects response otherwise it'll be stuck in a webhook retry loop(will keep on sending a new event).
